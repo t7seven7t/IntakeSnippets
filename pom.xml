@@ -1,0 +1,67 @@
+<!--Does not represent a full pom build script, mainly the parts needed to shade Intake into your plugin's jar for distribution-->
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>projectGroupId</groupId>
+    <artifactId>projectArtifactId</artifactId>
+    <version>projectVersion</version>
+    <name>projectName</name>
+
+    <pluginRepository>
+        <pluginRepository>
+            <id>maven2</id>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </pluginRepository>
+    </pluginRepository>
+
+    <repositories>
+        <repository>
+            <id>sk89q-repo</id>
+            <url>http://maven.sk89q.com/repo/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sk89q.intake</groupId>
+            <artifactId>Intake</artifactId>
+            <version>4.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <!-- And this is why I no longer use maven:-->
+    <!-- Shade the Intake class files into the output jar and move them to a different package to
+            prevent clashes with other plugins that may be using other versions of Intake -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <minimizeJar>true</minimizeJar>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.sk89q.intake*</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.sk89q.intake</pattern>
+                                    <shadedPattern>${project.groupId}.internal.intake
+                                    </shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

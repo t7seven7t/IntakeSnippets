@@ -1,0 +1,39 @@
+// This does not represent a full build script, only a snippet of how to shade Intake into your jar
+
+buildscript {
+    // Specify that we will use the shade plugin during the build and where it can be located
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.0'
+    }
+}
+
+// Apply it, you should also apply some other plugins like java, maven, etc in the rest of your script
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    // Add the sk89q repo where Intake's latest versions can be found
+    maven {
+        name 'sk89sq'
+        url 'http://maven.sk89q.com/repo/'
+    }
+}
+
+dependencies {
+    compile 'com.sk89q.intake:intake:4.0-SNAPSHOT'
+}
+
+shadowJar {
+    // the following tells the shadow plugin to include Intake's classes in the final jar
+    dependencies {
+        include(dependency('com.sk89q.intake:intake:4.0-SNAPSHOT'))
+    }
+
+    // move package to our own so that plugins using different versions of Intake don't clash
+    relocate('com.sk89q.intake', project.getGroup() + '.internal.intake')
+}
+
+build.dependsOn(shadowJar)
